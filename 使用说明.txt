@@ -1,0 +1,39 @@
+
+1.把zeb.c加入项目编译(不要把后缀改成cpp)
+
+
+2.修改AppDelegate.cpp,把zeb的加密功能加入lua库中.
+参考代码:
+
+extern "C"{
+    int luaopen_zed (lua_State *L); 
+}
+
+bool AppDelegate::applicationDidFinishLaunching()
+{
+    auto engine = LuaEngine::getInstance();
+    ScriptEngineManager::getInstance()->setScriptEngine(engine);
+
+	//加载其他库
+	LuaStack* luaStack = engine->getLuaStack();
+	lua_State *L = luaStack->getLuaState();
+	luaopen_zed(L);	//加载ZED加密解密库
+
+    if (engine->executeScriptFile("src/main.lua")) {
+        return false;
+    }
+    return true;
+}
+
+3.lua中的使用
+代码:
+
+local str = "abcdefsgagasg214215125"	--数据
+local key = "123"		--密钥
+local es = ZED.encrypt(str, key)	--加密
+local ds = ZED.decrypt(es, key)		--解密
+
+print("源数据", str)
+print("加密后",es)
+print("解密后",ds)
+
